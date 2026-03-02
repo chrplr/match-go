@@ -8,11 +8,15 @@ These tools are described in:
 - van Casteren, M., & Davis, M. H. (2006). Mix, a program for pseudorandomization. *Behavior Research Methods*, 38(4), 584–589. <https://doi.org/10.3758/BF03193889>
 - van Casteren, M., & Davis, M. H. (2007). Match: A program to assist in matching the conditions of factorial experiments. *Behavior Research Methods*, 39(4), 973–978. <https://doi.org/10.3758/BF03192992>
 
-Apps compiled for Windows, Linux and MacOS (darwin) can be downloaded from  <https://github.com/chrplr/match-go/releases>
+* Apps compiled for Windows, Linux and MacOS (darwin) can be downloaded from  <https://github.com/chrplr/match-go/releases>
 
-Read [TUTORIAL.md](TUTORIAL.md) for information about usage and compilation if needed.
+* Read [TUTORIAL.md](TUTORIAL.md) for information about usage and compilation if needed.
 
-See also [Shuffle](https://github.com/chrplr/shuffle-go).
+* See also: 
+   - [Shuffle](https://github.com/chrplr/shuffle-go)
+   - [MILP](https://github.com/gallantlab/milp_experimental_design)
+
+---
 
 **License:** GPLv3
 
