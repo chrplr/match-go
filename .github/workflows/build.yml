@@ -17,15 +17,18 @@ jobs:
           - os: ubuntu-latest
             goos: linux
             goarch: amd64
-            output: match-go-linux-amd64
+            match_output: match-go-linux-amd64
+            mix_output: mix-go-linux-amd64
           - os: windows-latest
             goos: windows
             goarch: amd64
-            output: match-go-windows-amd64.exe
+            match_output: match-go-windows-amd64.exe
+            mix_output: mix-go-windows-amd64.exe
           - os: macos-latest
             goos: darwin
             goarch: arm64
-            output: match-go-macos-arm64
+            match_output: match-go-macos-arm64
+            mix_output: mix-go-macos-arm64
 
     steps:
     - name: Checkout code
@@ -43,19 +46,41 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libwayland-dev libx11-dev libxkbcommon-x11-dev libgles2-mesa-dev libegl1-mesa-dev libffi-dev libxcursor-dev libvulkan-dev libx11-xcb-dev libxfixes-dev
 
-    - name: Build
+    - name: Build Match
       run: |
-        go build -o ${{ matrix.output }} .
+        go build -v -o ${{ matrix.match_output }} ./cmd/match
       env:
         GOOS: ${{ matrix.goos }}
         GOARCH: ${{ matrix.goarch }}
         CGO_ENABLED: 1
+        
+    - name: Build Mix
+      run: |
+        go build -v -o ${{ matrix.mix_output }} ./cmd/mix
+      env:
+        GOOS: ${{ matrix.goos }}
+        GOARCH: ${{ matrix.goarch }}
+
+    - name: Prepare Artifact
+      shell: bash
+      run: |
+        PKG_NAME=match-go-${{ matrix.goos }}-${{ matrix.goarch }}
+        mkdir -p "dist/$PKG_NAME"
+        
+        # Copy binaries
+        cp "${{ matrix.match_output }}" "dist/$PKG_NAME/"
+        cp "${{ matrix.mix_output }}" "dist/$PKG_NAME/"
+        
+        # Copy documentation and examples
+        cp README.txt TUTORIAL.md example_script.txt "dist/$PKG_NAME/"
+        cp -r example_data "dist/$PKG_NAME/"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.output }}
-        path: ${{ matrix.output }}
+        name: artifact-${{ matrix.goos }}-${{ matrix.goarch }}
+        path: dist/
+        if-no-files-found: error
 
   release:
     name: Create GitHub Release
@@ -71,10 +96,27 @@ jobs:
           path: ./artifacts
           merge-multiple: true
 
+      - name: Prepare Release Assets
+        shell: bash
+        run: |
+          cd artifacts
+          for d in */; do
+            d=${d%/}
+            if [[ "$d" == *"windows"* ]]; then
+              zip -r "$d.zip" "$d"
+            else
+              tar -czf "$d.tar.gz" "$d"
+            fi
+          done
+
+      - name: List Release Assets
+        run: ls -R ./artifacts
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./artifacts/*
-          generate_release_notes: true
+          files: |
+            ./artifacts/*.zip
+            ./artifacts/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-Here is a precise technical specification based on the provided paper, designed to guide an AI coder in reproducing the "Match" program in Golang.
+Here is a precise technical specification designed to guide an AI coder in reproducing the "Match" program in Golang.
 
 ### System Overview
 The goal of this Golang application is to automate the selection of matched subsets of items (or participants) from larger candidate sets for use in factorial experimental designs. Given multiple sets of candidate items, the program selects a predefined number of items from each set such that the selected groups are optimally matched across multiple numerical dimensions (e.g., word length, frequency). 
