@@ -1,0 +1,19 @@
+# Match-Go Example Script
+
+# 1. Define Input Files: ID Path OutputPath
+# F1: Fruits dataset
+# F2: Animals dataset
+InputFile F1 example_data/set_a.txt matched_fruits.txt
+InputFile F2 example_data/set_b.txt matched_animals.txt
+
+# 2. Match Fields: ID1 Col1 ID2 Col2 [Transform] [Label/Weight]
+# Column 2 is Length, Column 3 is Bigram Score
+MatchFields F1 2 F2 2 Length
+MatchFields F1 3 F2 3 Bigram
+
+# 3. Output Configuration
+# Select 10 items from each set
+OutputSize 10
+
+# Summary report location
+OutputFile example_summary.txt
