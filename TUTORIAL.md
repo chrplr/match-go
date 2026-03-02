@@ -1,76 +1,125 @@
-# Match-Go Tutorial
+# Match-Go & Mix Tutorial
 
-Match-Go is a tool for selecting matched subsets of items from larger candidate sets, commonly used in experimental designs. This tutorial will walk you through the process of setting up and running a matching task.
+This guide covers two companion programs: `match` and `mix`.
 
-## 1. Installation
+---
 
-Ensure you have [Go](https://go.dev/dl/) installed.
+## **Match**: Finding Matched Items
 
-Clone the repository and build the program:
+`match` is a tool for selecting matched subsets of items from larger candidate sets, commonly used in experimental designs.
+
+### 1. Installation
+
+Build the `match` program from the `cmd/match` directory:
 ```bash
-go build -o match-go *.go
+go build -o match ./cmd/match
 ```
 
-## 2. Preparing Your Data
+### 2. Preparing Your Data
 
-Data files should be plain text files where each line represents an item and columns are separated by whitespace.
+Data files should be plain text, with columns separated by whitespace.
 
-Example (`set_a.txt`):
+*`set_a.txt`:*
 ```text
 apple 5 120
 banana 6 150
-cherry 6 180
 ...
 ```
 
-## 3. Creating a Script
+### 3. Creating a `match` Script
 
-A script file tells Match-Go which files to use and how to match them.
+A script file tells `match` which files to use and how to match them.
 
-### Script Commands:
-- `InputFile <ID> <InputPath> <OutputPath>`: Define an input dataset and where to save the selected items.
-- `MatchFields <ID1> <Col1> <ID2> <Col2> [Transform] [Weight]`: Define which columns to match between two sets.
-    - Transformations: `UseLength` (count characters), `UseLog10` (base-10 logarithm).
-- `OutputSize <N>`: Number of items to select from each set.
-- `OutputFile <Path>`: Path for the summary report.
+#### Script Commands
+- `InputFile <ID> <InputPath> <OutputPath>`
+- `MatchFields <ID1> <Col1> <ID2> <Col2> [Transform] [Weight]`
+- `OutputSize <N>`
+- `OutputFile <Path>`
 
-### Example Script (`example_script.txt`):
+#### Example Script (`example_script.txt`)
 ```text
 InputFile F1 set_a.txt out_a.txt
 InputFile F2 set_b.txt out_b.txt
-
 MatchFields F1 2 F2 2 Length
 MatchFields F1 3 F2 3 Bigram
-
 OutputSize 10
 OutputFile summary.txt
 ```
 
-## 4. Running the Software
+### 4. Running `match`
 
-### Using the GUI
-Simply run the program without arguments to open the graphical interface:
+#### GUI Mode
+Run without arguments to open the graphical interface:
 ```bash
-./match-go
+./match
 ```
-1. Enter the path to your script (e.g., `example_script.txt`).
-2. Click **Start**.
-3. Watch the "Best Distance" update as the program finds better matches.
-4. Click **Stop** at any time to save the current best results.
 
-### Using the CLI
-Run the program with the script path as an argument:
+#### CLI Mode
+Provide the script path as an argument:
 ```bash
-./match-go example_script.txt
+./match example_script.txt
 ```
-The program will run until it exhaustively searches the space or is interrupted (Ctrl+C). Upon interruption, it saves the best solution found.
 
-## 5. Understanding the Output
+---
 
-- **Matched Files:** Each output file (e.g., `out_a.txt`, `out_b.txt`) will contain exactly `OutputSize` items. Items on the same line number across different files are matched to each other.
-- **Summary Report:** Contains the total distance (lower is better) and a summary of the matching configuration.
+## **Mix**: Pseudorandomizing Lists
 
-## 6. Tips for Better Matching
-- **Weights:** You can add a weight to a dimension in `MatchFields` (e.g., `MatchFields F1 2 F2 2 2.0`) to make it twice as important in the calculation.
-- **Transformations:** Use `UseLog10` for variables like frequency that often have a skewed distribution.
-- **Time:** For very large datasets, the search space grows exponentially. Use the **Stop** button or Ctrl+C once the "Best Distance" stops improving significantly.
+`mix` is a simple command-line tool for combining multiple lists into a single, pseudorandomized list. Its key feature is constraining the number of consecutive items from the same source file.
+
+### 1. Installation
+
+Build the `mix` program from the `cmd/mix` directory:
+```bash
+go build -o mix ./cmd/mix
+```
+
+### 2. Preparing Your Data
+
+Input files for `mix` are simple lists, with one item per line.
+
+*`list_A.txt`:*
+```text
+itemA1
+itemA2
+itemA3
+```
+
+*`list_B.txt`:*
+```text
+itemB1
+itemB2
+itemB3
+```
+
+### 3. Running `mix`
+
+`mix` is run from the command line with the following syntax:
+
+```bash
+./mix -n <max_consecutive> -o <output_file> <input_file1> <input_file2> ...
+```
+
+#### Arguments
+- `-n <number>`: The maximum number of consecutive items from the same source file. Defaults to `2`.
+- `-o <path>`: The path for the final mixed output file. Defaults to `mixed_list.txt`.
+- `<input_file...>`: A space-separated list of two or more input files.
+
+### 4. Example Usage
+
+Let's say you want to combine `list_A.txt` and `list_B.txt`, ensuring no more than **two** items from the same list appear in a row.
+
+**Command:**
+```bash
+./mix -n 2 -o final_list.txt list_A.txt list_B.txt
+```
+
+**Possible `final_list.txt` Output:**
+```text
+itemA1
+itemB2
+itemB1
+itemA3
+itemA2
+itemB3
+```
+*(Note: The actual order is random but will always respect the `-n 2` constraint.)*
